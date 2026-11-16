@@ -1,6 +1,6 @@
 # Latency-aware EMG decoding for prosthetic hands (NinaPro DB8)
 
-ES 335 Machine Learning course project, IIT Gandhinagar, 2026.
+ES 335 Machine Learning course project, IIT Gandhinagar, 2026. Aryan Lahoti and Saujas Seth.
 
 **Project website:** https://aryan-lahoti.github.io/emg-latency-decoding/
 
@@ -116,7 +116,11 @@ The nine MuJoCo clips at the top of the Results section are read from `docs/asse
 
 - While debugging the first ridge run, session-3 results for subjects 1 and 5 were looked at. No setting was chosen from them.
 - Per-session calibration was selected on validation and slightly hurt on the test session (6.39° with, 6.15° without). The selected model is reported as the official result.
-- Tree settings are library defaults and were not tuned.
+- Tree settings are library defaults and were not tuned. The neural network's settings were also fixed once; it stopped at its 60-epoch limit with a convergence warning.
+- The same-session nonlinear validation that scored 4.6° used five subjects (1, 3, 5, 8, 11), not all 12.
+- The final decoder's 50 ms window was chosen for delay, not by validation across windows.
+- The Task 2 table on the website combines two runs with slightly different EMG features (RMS only for persistence, deadband and tree gate; RMS and MAV for the other rows). Persistence is identical in both.
+- "About 45 ms" is the processing delay of the newest sample. The decoder's effective lag, with integrators of up to 4 s, was not measured, and horizon results are a design budget, not a measured lead, because labels come from the opposite hand.
 - The per-person label time shift and the recurrent network described in the proposal were not run.
 
 ## AI-use disclosure

@@ -325,8 +325,8 @@
   (function () {
     var task = 'task1', group = 'able', view = 'chart', names = ['Rest', 'Hold', 'Moving'], cols = [C.blue, C.orange, C.aqua];
     var notes = {
-      task1: 'Task 1 decodes posture from EMG alone. Holds were the worst phase for ridge; memory and a nonlinear readout cut that error by 44%. Rest error sits at the 4.3° resting-posture floor.',
-      task2: 'Task 2 knows the current angle and forecasts 100 ms ahead. When nothing moves, doing nothing is nearly perfect. During movement, momentum (no EMG) beats every EMG model.'
+      task1: 'Task 1 decodes posture from EMG alone. Holds were the worst phase for ridge; memory and a nonlinear readout cut that error by 44%. For the able-bodied group, rest error sits at the 4.3° resting-posture floor. Integrator rows use the same calibration as the chosen model.',
+      task2: 'Task 2 knows the current angle and forecasts 100 ms ahead. When nothing moves, doing nothing is nearly perfect. During movement, momentum (no EMG) beats every EMG model. Rows come from two runs with slightly different EMG features (see the integrity notes).'
     };
     var c = chart('phaseChart', function (host, w) {
       var rows = D[task][group], max = 0; rows.forEach(function (r) { for (var i = 0; i < 3; i++) if (r.v[i] > max) max = r.v[i]; });
@@ -365,7 +365,7 @@
       var h = H.h[sel], net = Math.round(h - shown), extra = H.all.mae[sel] - H.all.mae[0];
       $('#horRead').innerHTML = '<li><b>' + H.all.mae[sel].toFixed(2) + '°</b>error, all 12 people (R² ' + H.all.r2[sel].toFixed(2) + ')</li>' +
         '<li><b>' + (sel ? '+' + extra.toFixed(2) + '°' : 'baseline') + '</b>' + (sel ? 'cost of looking ahead' : 'predicting the present') + '</li>' +
-        '<li><b>' + (net >= 0 ? net + ' ms ahead' : (-net) + ' ms behind') + '</b>net lead after the decoder’s delay</li>';
+        '<li><b>' + (net > 0 ? '+' : net < 0 ? '−' : '') + Math.abs(net) + ' ms</b>nominal lead (horizon − estimated delay)</li>';
     }
     var b = chart('budgetChart', function (host, w) {
       var h = 150, mL = w < 520 ? 0 : 150, mR = 16, s = newSvg(host, w, h, 'Decoder delay compared with the prediction horizon');
@@ -373,9 +373,9 @@
       svgEl('rect', { x: X(30), y: 22, width: X(100) - X(30), height: 84, fill: C.aqua, opacity: .1 }, s);
       svgEl('text', { x: X(65), y: 16, 'text-anchor': 'middle', class: 'muted' }, s, w < 520 ? 'EMG-to-force delay' : 'body’s own EMG-to-force delay, 30–100 ms');
       [0, 50, 100, 150].forEach(function (t) { svgEl('line', { x1: X(t), x2: X(t), y1: 22, y2: 110, class: t === 100 ? 'axis' : 'grid', stroke: t === 100 ? C.ink3 : undefined }, s); svgEl('text', { x: X(t), y: 126, 'text-anchor': t === 0 ? 'start' : 'middle', class: 'muted' }, s, t + ' ms'); });
-      svgEl('text', { x: X(100) + 5, y: 142, class: 'muted' }, s, '↑ practical limit');
+      svgEl('text', { x: X(100) + 5, y: 142, class: 'muted' }, s, w < 520 ? '↑ practical limit' : '↑ practical limit, 100–125 ms');
       var y1 = 36, y2 = 76;
-      if (w >= 520) { svgEl('text', { x: mL - 12, y: y1 + 11, 'text-anchor': 'end' }, s, 'Decoder delay'); svgEl('text', { x: mL - 12, y: y2 + 11, 'text-anchor': 'end' }, s, 'Horizon'); }
+      if (w >= 520) { svgEl('text', { x: mL - 12, y: y1 + 11, 'text-anchor': 'end' }, s, 'Processing delay'); svgEl('text', { x: mL - 12, y: y2 + 11, 'text-anchor': 'end' }, s, 'Horizon'); }
       var parts = [['envelope window', dl.envelope, C.blue], ['inference', dl.inferMedian, '#6da7ec'], ['filters', dl.filter, '#cde2fb']], x = 0;
       parts.forEach(function (p, i) {
         var r = svgEl('path', { d: barPath(X(x) + (i ? 1 : 0), y1, X(x + p[1]) - X(x) - (i ? 1 : 0) - 1, 14, i === parts.length - 1 ? 4 : 0), fill: p[2], class: 'mk' }, s);
@@ -383,7 +383,7 @@
       });
       svgEl('text', { x: X(total) + 8, y: y1 + 11, class: 'val' }, s, 'about 45 ms');
       if (hz > 0) { svgEl('path', { d: barPath(X(0), y2, X(hz) - X(0), 14, 4), fill: C.orange }, s); svgEl('text', { x: X(hz) + 8, y: y2 + 11, class: 'val' }, s, hz + ' ms ahead'); }
-      else svgEl('text', { x: X(0) + 8, y: y2 + 11, class: 'muted' }, s, 'none: the output describes a moment about 45 ms old');
+      else svgEl('text', { x: X(0) + 8, y: y2 + 11, class: 'muted' }, s, 'none: about 45 ms of processing delay is not covered');
       host.insertAdjacentHTML('beforeend', '<ul class="legend" style="margin-top:4px"><li><i style="background:' + C.blue + '"></i>envelope window, 25 ms</li><li><i style="background:#6da7ec"></i>inference, 16.5 ms</li><li><i style="background:#cde2fb"></i>filters, 1 to 3 ms</li><li><i style="background:' + C.orange + '"></i>prediction horizon</li></ul>');
     });
     var c1 = chart('horChart', function (host, w) {
@@ -452,19 +452,71 @@
     document.addEventListener('visibilitychange', sync);
   })();
 
-  /* ---------- section rail ---------- */
+  /* ---------- section rail: a neuron whose axon lights up as you scroll ----------
+     Cell body and dendrites sit above the list; the axon runs down past every section, with a short
+     side branch ending in a synapse beside each label. A bright copy of the same drawing is revealed
+     from the top down to the reading position. */
   (function () {
-    var links = $all('#rail a'), pulse = $('#railPulse'); if (!links.length) return;
+    var links = $all('#rail a'), wrap = $('.railwrap'), ol = $('#rail'), svg = $('#railNeuron'); if (!links.length) return;
     var secs = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    var AX = 15, BX = 33, nodeY = [], somaY = 0, endY = 0, clipRect = null, halo = null, built = false;
+    function f1(v) { return v.toFixed(1); }
+    function build() {
+      built = false; if (!svg || !wrap || getComputedStyle(svg).display === 'none') return;
+      var r = mulberry(21), H = wrap.offsetHeight, top = ol.offsetTop, thick = '', thin = '', dots = [];
+      nodeY = links.map(function (a) { var li = a.parentNode; return top + li.offsetTop + li.offsetHeight / 2; });
+      somaY = top - 28; endY = nodeY[nodeY.length - 1] + 26;
+      /* dendrites: short random walks fanning up and out from the cell body, each with one side twig */
+      [-2.85, -2.3, -1.75, -1.2, -0.7, -0.2].forEach(function (a0) {
+        var a = a0 + (r() - 0.5) * 0.3, x = AX + Math.cos(a) * 6, y = somaY + Math.sin(a) * 5, n = 5 + Math.floor(r() * 2);
+        thick += 'M' + f1(x) + ' ' + f1(y);
+        for (var i = 0; i < n; i++) {
+          a += (r() - 0.5) * 0.7; x += Math.cos(a) * 6.4; y += Math.sin(a) * 5.4; thick += 'L' + f1(x) + ' ' + f1(y);
+          if (i === 1 || (i === 3 && r() < 0.5)) { var b = a + (r() < 0.5 ? -0.8 : 0.8), bx = x, by = y; thin += 'M' + f1(bx) + ' ' + f1(by); for (var k = 0; k < 2; k++) { b += (r() - 0.5) * 0.5; bx += Math.cos(b) * 5.5; by += Math.sin(b) * 5; thin += 'L' + f1(bx) + ' ' + f1(by); } }
+        }
+      });
+      /* axon, with a slight wander between sections */
+      var y0 = somaY + 5; thick += 'M' + AX + ' ' + f1(y0);
+      nodeY.concat([endY]).forEach(function (y1) { var w = (r() - 0.5) * 5, g = (y1 - y0) / 3; thick += 'C' + f1(AX + w) + ' ' + f1(y0 + g) + ' ' + f1(AX - w) + ' ' + f1(y0 + 2 * g) + ' ' + AX + ' ' + f1(y1); y0 = y1; });
+      /* one synapse beside each section label */
+      nodeY.forEach(function (y) { thin += 'M' + AX + ' ' + f1(y - 4) + 'Q' + (AX + 3) + ' ' + f1(y) + ' ' + (BX - 4) + ' ' + f1(y); dots.push([BX, y, 3.6]); });
+      /* axon terminals */
+      [[-9, 13], [1, 17], [10, 12]].forEach(function (t) { thin += 'M' + AX + ' ' + f1(endY) + 'Q' + f1(AX + t[0] * 0.3) + ' ' + f1(endY + t[1] * 0.75) + ' ' + f1(AX + t[0]) + ' ' + f1(endY + t[1]); dots.push([AX + t[0], endY + t[1], 2.1]); });
+      svg.innerHTML = ''; svg.setAttribute('viewBox', '0 0 60 ' + H); svg.setAttribute('width', 60); svg.setAttribute('height', H);
+      function layer(parent, stroke, fill, somaFill) {
+        var g = svgEl('g', { fill: 'none', stroke: stroke, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, parent);
+        svgEl('path', { d: thick, 'stroke-width': 1.7 }, g); svgEl('path', { d: thin, 'stroke-width': 1 }, g);
+        dots.forEach(function (c) { svgEl('circle', { cx: f1(c[0]), cy: f1(c[1]), r: c[2], fill: fill, 'stroke-width': 1.2 }, g); });
+        svgEl('ellipse', { cx: AX, cy: f1(somaY), rx: 7.4, ry: 6.2, fill: somaFill, stroke: 'none' }, g);
+        return g;
+      }
+      layer(svg, '#254a74', '#0d2340', '#254a74');
+      var defs = svgEl('defs', {}, svg), cp = svgEl('clipPath', { id: 'railLit', clipPathUnits: 'userSpaceOnUse' }, defs);
+      clipRect = svgEl('rect', { x: -40, y: -20, width: 160, height: 0 }, cp);
+      var glow = svgEl('g', { class: 'lit' }, svg), lit = svgEl('g', { 'clip-path': 'url(#railLit)' }, glow);
+      layer(lit, '#86d0ff', '#d6efff', '#e6f5ff');
+      halo = svgEl('g', { class: 'halo' }, svg);
+      svgEl('circle', { cx: BX, cy: 0, r: 9, fill: '#86d0ff', opacity: 0.16 }, halo);
+      svgEl('circle', { cx: BX, cy: 0, r: 4.6, fill: '#ffffff' }, halo);
+      built = true;
+    }
     function update() {
       var y = window.scrollY + window.innerHeight * 0.35, cur = -1;
       secs.forEach(function (s, i) { if (s && s.offsetTop <= y) cur = i; });
       links.forEach(function (a, i) { a.classList.toggle('here', i === cur); a.classList.toggle('passed', i < cur); if (i === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
-      if (pulse && cur >= 0) pulse.style.height = Math.max(0, links[cur].parentNode.offsetTop) + 'px'; else if (pulse) pulse.style.height = '0px';
+      if (!built) return;
+      if (cur < 0) { clipRect.setAttribute('height', 0); halo.style.opacity = 0; return; }
+      var s = secs[cur], next = cur + 1 < nodeY.length ? nodeY[cur + 1] : endY + 22;
+      var f = Math.max(0, Math.min(1, (y - s.offsetTop) / Math.max(1, s.offsetHeight)));
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) f = 1;
+      clipRect.setAttribute('height', f1(20 + nodeY[cur] + 6 + f * (next - nodeY[cur] - 8)));
+      halo.style.opacity = 1; halo.style.transform = 'translate(0px,' + f1(nodeY[cur]) + 'px)';
     }
     var tick = false;
     window.addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(function () { update(); tick = false; }); } }, { passive: true });
-    window.addEventListener('resize', update); update();
+    var rT; window.addEventListener('resize', function () { clearTimeout(rT); rT = setTimeout(function () { build(); update(); }, 150); });
+    build(); update();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { build(); update(); });
   })();
 
   /* =====================================================================

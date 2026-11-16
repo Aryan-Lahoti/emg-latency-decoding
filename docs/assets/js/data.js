@@ -64,11 +64,12 @@ window.EMG = {
 
   /* Task 1: EMG only -> 5 finger angles, MAE in degrees by phase [rest, hold, moving, overall] */
   task1: {
+    /* integrator rows are the calibrated runs (results/benchmark/s3_test_all.csv, calib == True), like the chosen model */
     able: [
       { id: "ridge1", name: "Ridge, envelopes + 1.5 s history", v: [5.71,14.22,12.70,9.25] },
-      { id: "ridgeI", name: "Ridge, leaky-integrator features", v: [6.84,12.46,12.05,9.30] },
-      { id: "trees",  name: "Boosted trees, integrator features", v: [4.24,8.48,9.09,6.29] },
-      { id: "net",    name: "Neural net, integrator features", v: [4.70,8.31,8.99,6.47] },
+      { id: "ridgeI", name: "Ridge, leaky-integrator features", v: [7.26,13.16,12.62,9.81] },
+      { id: "trees",  name: "Boosted trees, integrator features", v: [4.34,8.58,9.39,6.45] },
+      { id: "net",    name: "Neural net, integrator features", v: [4.77,8.22,8.99,6.50] },
       { id: "final",  name: "Net + trees averaged (chosen model)", v: [4.29,7.90,8.53,6.06], chosen: true },
       { id: "nocal",  name: "Same, without calibration (ablation)", v: [4.12,7.83,8.42,5.93] }
     ],

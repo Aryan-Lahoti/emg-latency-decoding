@@ -17,7 +17,7 @@
   <div class="hero-inner">
     <h1>How fast can a prosthetic hand read its user's muscles?</h1>
     <p class="lede">We predict five finger angles from 16 forearm muscle sensors, for 12 people including two amputees, and measure what each millisecond of decoder delay costs in accuracy.</p>
-    <p class="byline"><span id="authors">Aryan Lahoti and teammate</span>, ES 335 Machine Learning, IIT Gandhinagar, November 2026. <a href="https://github.com/Aryan-Lahoti/emg-latency-decoding">Code and results on GitHub</a></p>
+    <p class="byline"><span id="authors">Aryan Lahoti and Saujas Seth</span>, ES 335 Machine Learning, IIT Gandhinagar, November 2026. <a href="https://github.com/Aryan-Lahoti/emg-latency-decoding">Code and results on GitHub</a></p>
     <p class="watch" id="watchLink" hidden><a href="#clips">Watch the decoder drive a simulated hand</a></p>
   </div>
   <p class="trace-note">Background trace: synthetic EMG with its envelope, for illustration</p>
@@ -25,14 +25,14 @@
 
 <div class="findings" aria-label="Main findings">
   <div><b>6.4°</b><span>Mean finger-angle error from muscle signals alone (R² 0.76). Level with published deep-learning results on this benchmark.</span></div>
-  <div><b>+0.17°</b><span>Extra error when the decoder predicts 150 ms into the future instead of the present moment.</span></div>
-  <div><b>about 45 ms</b><span>Total decoder delay. The 50 ms averaging window is the largest part; the filters cost 1 to 3 ms.</span></div>
-  <div><b>1.75° vs 2.33°</b><span>When the finger's current angle is known, plain momentum beats our EMG model at forecasting 100 ms ahead. We report it as found.</span></div>
+  <div><b>+0.17°</b><span>Extra error, across all 12 people, when the decoder predicts 150 ms into the future instead of the present moment.</span></div>
+  <div><b>about 45 ms</b><span>Processing delay of the newest sample. The 50 ms averaging window is the largest part. The decoder's effective lag was not measured.</span></div>
+  <div><b>1.75° vs 2.33°</b><span>During movement, with the finger's current angle known, momentum (half the current velocity, no EMG) beats our EMG model at forecasting 100 ms ahead. We report it as found.</span></div>
 </div>
 
 <div class="frame">
   <nav class="rail" aria-label="Sections">
-    <div class="railwrap"><span class="pulse" id="railPulse" aria-hidden="true"></span>
+    <div class="railwrap"><svg id="railNeuron" aria-hidden="true" focusable="false"></svg>
     <ol id="rail">
       <li><a href="#question">The question</a></li>
       <li><a href="#data">The data</a></li>
@@ -60,14 +60,14 @@
 
     <div class="two wide-left">
       <div>
-        <p>Prosthesis research puts the delay a controller can spend at roughly 100 ms before users notice the hand lagging<sup><a href="#ref-farrell">[7]</a></sup>. A decoder spends that budget in two places. It needs a stretch of past signal to average, because one instant of EMG is noise. And it needs time to compute.</p>
-        <p>There is one way to buy time back: predict ahead. Muscles fire tens of milliseconds before force appears<sup><a href="#ref-emd">[8]</a></sup>, so a decoder can aim at where the fingers <em>will be</em>, and cancel its own delay.</p>
+        <p>Prosthesis research puts the delay a controller can spend at about 100 to 125 ms before users notice the hand lagging<sup><a href="#ref-farrell">[7]</a></sup>. A decoder spends that budget in two places. It needs a stretch of past signal to average, because one instant of EMG is noise. And it needs time to compute.</p>
+        <p>There is one way to buy time back: predict ahead. Muscles fire tens of milliseconds before force appears<sup><a href="#ref-emd">[8]</a></sup>, so a decoder can aim at where the fingers <em>will be</em>, to offset its own delay.</p>
         <p><strong>Our question:</strong> how do the amount of past signal the decoder reads (the <strong>window</strong>) and how far ahead it predicts (the <strong>horizon</strong>) trade accuracy against responsiveness?</p>
       </div>
       <div>
-        <h4>Net lead, the number a device designer needs</h4>
-        <p class="small" style="color:var(--ink-2)">net lead = horizon − decoder delay<br>decoder delay = filters + about half the window + compute</p>
-        <p class="small">Positive: the prediction arrives before the moment it describes, leaving time for motors. Negative: the hand is behind the user.</p>
+        <h4>Nominal lead, a design budget</h4>
+        <p class="small" style="color:var(--ink-2)">nominal lead = horizon − estimated processing delay<br>processing delay = filters + about half the window + compute</p>
+        <p class="small">Positive: the horizon covers the processing delay, with the remainder left for motors. It is a budget, not a measured lead, because the labels in this dataset come from the other hand.</p>
       </div>
     </div>
 
@@ -184,7 +184,7 @@
       <li><h4>Stored at 2 kHz, recorded at 1,111 Hz</h4><p>Nothing above 555 Hz is real. Upsampling left a faint image up there, which must be removed before changing the rate.</p></li>
       <li class="ok"><h4>Mains hum was already removed</h4><p>The spectrum shows dips, not spikes, at every multiple of 50 Hz. No notch filter needed: one filter and one delay fewer.</p></li>
       <li><h4>Amputees have empty channels</h4><p>Person 11 has 13 working sensors and person 12 has 12. The rest are all zeros. We flag them so no model reads them and no normalisation divides by zero.</p></li>
-      <li><h4>Resting posture drifts</h4><p>Person 1's relaxed thumb sits anywhere from about 5° to 22° while the muscles are quiet. No EMG decoder can explain that. Measured across the test sessions, the spread in resting posture is 4.3°.</p></li>
+      <li><h4>Resting posture drifts</h4><p>Person 1's relaxed thumb sits anywhere from about 5° to 22° while the muscles are quiet. No EMG decoder can explain that. Across the test sessions the spread in resting posture averages 4.3° for the able-bodied group.</p></li>
       <li><h4>Movements are recorded in blocks</h4><p>All repetitions of movement 1, then all of movement 2. Fatigue is tangled with movement type, so we test on a separately recorded session.</p></li>
       <li><h4>Some sensors barely respond</h4><p>Sensors 3, 4, 11 and 12 of person 1 hardly change between rest and movement. Sensors were placed evenly, not on chosen muscles.</p></li>
     </ul>
@@ -206,7 +206,7 @@
               <tr><td><code>glove</code></td><td>18</td><td>CyberGlove II joint sensors, left hand</td><td>Target, after mapping to 5 angles</td></tr>
               <tr><td><code>restimulus</code></td><td>1</td><td>Movement label, timing corrected to the actual movement</td><td>Segmenting, phases</td></tr>
               <tr><td><code>rerepetition</code></td><td>1</td><td>Repetition number</td><td>Splitting train and validation</td></tr>
-              <tr><td><code>acc</code>, <code>gyro</code>, <code>mag</code></td><td>48 each</td><td>Motion sensors inside the EMG sensors</td><td>Not used (the forearm rests on a desk)</td></tr>
+              <tr><td><code>acc</code>, <code>gyro</code>, <code>mag</code></td><td>48 each</td><td>Motion sensors inside the EMG sensors</td><td>Not used: the forearm moves little in these finger tasks, and the planned ablation was not run</td></tr>
             </tbody>
           </table></div>
           <p>The five targets (thumb rotation, thumb flexion, index, middle, ring and little together) use the fixed linear mapping published with the dataset, so our numbers are comparable with other papers.</p>
@@ -351,7 +351,7 @@
       <li>
         <span class="k">3</span>
         <h3>Tell the model where the finger is</h3>
-        <p>For Task 2 we added the current angle as an input. The fitted model is close to: future angle = 0.99 × current angle + a correction computed from EMG.</p>
+        <p>For Task 2 we added the current angle as an input. The fitted model (checked on person 3) is close to: future angle = 0.99 × current angle + a correction computed from EMG.</p>
         <p>During movement the correction helps: 2.35° against persistence's 2.69° at 100 ms. When the fingers are still, it hurts. Resting EMG is never perfectly flat, and a linear model turns every wobble into a small movement that never happens: 0.94° error during holds, against 0.25° for doing nothing.</p>
         <p class="verdict"><b>What it taught us:</b> the correction is right when the hand moves and should be silent when it does not.</p>
       </li>
@@ -367,7 +367,7 @@
         <p>Hold is the trap. After the burst that moves a finger, the EMG decays to a low level while the finger stays bent. A linear model reads "less EMG" as "smaller angle".</p>
         <figure class="panel" style="margin:18px 0">
           <div class="chart" id="holdChart"></div>
-          <figcaption>Sketch of what we measured, not a recording: during holds the EMG-only ridge estimate sat 58% to 68% of the way from rest to the true held angle. Treat a hold as rest and the estimate sags back. Treat it as movement and the correction keeps nudging a finger that is not moving.</figcaption>
+          <figcaption>Sketch of what we measured, not a recording: during holds the EMG-only ridge estimate sat 58% to 68% of the way from rest to the true held angle (four people: 1, 3, 5 and 8). Treat a hold as rest and the estimate sags back. Treat it as movement and the correction keeps nudging a finger that is not moving.</figcaption>
         </figure>
         <p>"Low EMG, but not resting: keep the angle" is an if-then rule. Decision trees are made of if-then rules, so we put a classifier in front of the regression: gradient-boosted trees read the EMG and output the probability of each state. The prediction becomes</p>
         <p style="color:#fff;font-weight:600">future angle = current angle + P(moving) × ridge correction</p>
@@ -382,7 +382,7 @@
             <tr><td>Ridge with current angle, no gate</td><td class="num">0.96°</td></tr>
           </tbody>
         </table></div>
-        <p class="verdict"><b>What it taught us:</b> gating works. The tree gate was the best model for 11 of the 12 people when it had 1.5 s of history. With a 50 ms window and only 0.3 s of history it loses its edge and the plain deadband ties it: learned gating needs context.</p>
+        <p class="verdict"><b>What it taught us:</b> gating works. The tree gate was the best model for 11 of the 12 people with a 100 ms window and 1.5 s of history (10 of 12 with a 200 ms window). With a 50 ms window and only 0.3 s of history it loses its edge and the plain deadband ties it: learned gating needs context.</p>
         <details style="margin-top:18px">
           <summary>How separable are the states from EMG level alone?</summary>
           <div class="body">
@@ -423,7 +423,7 @@
             </ul>
           </div>
         </div>
-        <p>We chose it by cross-session validation: train on session 1, validate on session 2, and the reverse. Same-day validation flattered the neural network badly (4.6°, R² 0.89), because movements are recorded in blocks. Across days the chosen combination scored 7.8° and R² 0.70. Session 3 stayed closed until the choice was made.</p>
+        <p>We chose it by cross-session validation: train on session 1, validate on session 2, and the reverse. Same-session validation on five people flattered the neural network (4.6°, R² 0.89): validation repetitions came from the same day and electrode placement, so they hid the day-to-day shift. Across days the chosen combination scored 7.8° and R² 0.70. Session 3 stayed closed until the choice was made.</p>
         <p class="verdict"><b>Result on session 3:</b> MAE 6.39°, R² 0.76 for all 12 people. A linear readout on exactly the same features scores 10.03°: the features are not enough without the nonlinearity.</p>
       </li>
     </ol>
@@ -432,6 +432,7 @@
       <h3>The whole journey in one chart</h3>
       <p class="sub">Mean absolute error for Task 1 on the test session, able-bodied participants. Lower is better.</p>
       <div class="chart" id="journeyChart"></div>
+      <p class="note">The three integrator rows use the same per-session calibration as the chosen model, so the comparison is like for like. With calibration the linear readout is worse than the simpler ridge above it (9.81° against 9.25°).</p>
     </div>
   </section>
 
@@ -475,7 +476,10 @@
             <li>The step-by-step findings in the Models section (history helps, the stateful model jitters, momentum wins) are descriptive results on session 3. Model <em>selection</em> for the gates and for the final decoder used validation data.</li>
             <li>Validation chose the per-session calibration. On the test session the model without it was slightly better (6.15° against 6.39°). We report the chosen model as the official number; switching after seeing the test would be selecting on the test set.</li>
             <li>The 1.5 s history cut-off was a judgement call: gains were shrinking, and longer history risks learning the fixed rhythm of the protocol. We later checked that risk on the final model (see error analysis).</li>
-            <li>Tree settings are library defaults and were not tuned.</li>
+            <li>Tree settings are library defaults and were not tuned. The neural network's settings were also fixed once; it stopped at its 60-epoch limit with a convergence warning.</li>
+            <li>The same-session validation that scored 4.6° used five people (1, 3, 5, 8 and 11), not all 12.</li>
+            <li>The final decoder's 50 ms window was chosen for delay, not by validation across windows.</li>
+            <li>The Task 2 table combines two runs with slightly different EMG features: persistence, deadband and tree gate use RMS only; the other rows use RMS and MAV. Persistence is identical in both.</li>
           </ul>
         </div>
       </details>
@@ -500,7 +504,7 @@
     </section>
 
     <h3>Against published results on the same benchmark</h3>
-    <p>Same data, same split (train on sessions 1 and 2, test on session 3), same five finger angles, all predicting the present moment.</p>
+    <p>Same data, same session split (train on sessions 1 and 2, test on session 3), same five finger angles, all predicting the present moment. Two exceptions: Baracat et al. tested on held-out people, and KinEMbed used 11 of the 12.</p>
     <div class="two">
       <div class="panel" style="margin:10px 0">
         <h3>Mean absolute error</h3>
@@ -522,7 +526,7 @@
         <tr><td>Amputees (2)</td><td class="num">8.04°</td><td class="num"></td><td class="num">0.64</td><td class="num"></td></tr>
       </tbody>
     </table></div>
-    <p><strong>Reading it fairly.</strong> We are behind the online transformer on MAE (6.39° against 6.08°), ahead of the temporal convolutional network (6.89°), and level with or slightly ahead of KinEMbed on R² (0.76 against 0.73 overall; 0.64 against 0.57 for the amputees). Papers average a little differently and KinEMbed left out one participant, so we call this on par, not a ranking. Our model is fixed filters, trees and a small network: about three minutes of CPU time per person.</p>
+    <p><strong>Reading it fairly.</strong> We are behind the online transformer on MAE (6.39° against 6.08°), ahead of the temporal convolutional network (6.89°), and level with or slightly ahead of KinEMbed on R² (0.76 against 0.73 overall). For the two amputees our 0.64 is above both published figures, 0.57 and the dataset authors' 0.60. Papers average a little differently and KinEMbed left out one participant, so we call this on par, not a ranking. Our model is fixed filters, trees and a small network: about three minutes of CPU time per person.</p>
     <p class="small">None of these papers predicts ahead, and none corrects the opposite-hand timing. Our horizon results below have no published counterpart to compare with.</p>
 
     <div class="panel" id="phasePanel">
@@ -550,7 +554,7 @@
 
     <div class="panel" id="horPanel">
       <h3>Predicting ahead, and what it buys</h3>
-      <p class="sub">For someone wearing the hand this is the number that matters most: a prediction is only useful if it arrives before the moment it describes. Move the horizon and watch the error and the net lead.</p>
+      <p class="sub">For someone wearing the hand this is the number that matters most: a prediction is only useful if it arrives before the moment it describes. Move the horizon and watch the error and the nominal lead.</p>
       <div class="controls">
         <span class="lab" id="horLab">Predict</span>
         <div class="seg" id="horSel" role="group" aria-labelledby="horLab">
@@ -574,10 +578,10 @@
           <div class="chart" id="t2Chart"></div>
         </div>
       </div>
-      <p class="note">Decoder delay, measured: filters 1 to 3 ms, 50 ms envelope about 25 ms, inference 16.5 ms median (23.7 ms at the 95th percentile) in scikit-learn on a CPU. Almost all of the inference time is Python overhead. The 100 ms line is the practical controller limit from prosthesis research<sup><a href="#ref-farrell">[7]</a></sup>; the body's own EMG-to-force delay is roughly 30 to 100 ms<sup><a href="#ref-emd">[8]</a></sup>. Motor delay is not part of this project and would come out of the net lead.</p>
+      <p class="note">Processing delay of the newest sample, measured: filters 1 to 3 ms, 50 ms envelope about 25 ms, inference 16.5 ms median (23.7 ms at the 95th percentile) in scikit-learn on a CPU. Almost all of the inference time is Python overhead. The decoder also reads integrators with up to 4 s of memory, and its effective lag was not measured. The 100 ms line is the lower end of the 100 to 125 ms controller delay recommended in prosthesis research<sup><a href="#ref-farrell">[7]</a></sup>; the body's own EMG-to-force delay is roughly 30 to 100 ms<sup><a href="#ref-emd">[8]</a></sup>. Motor delay is not part of this project and would come out of the nominal lead.</p>
     </div>
 
-    <p><strong>What this says.</strong> Predicting 50 ms ahead costs 0.06° and pays back the decoder's whole 45 ms delay. At 150 ms the cost is 0.17°, with about 105 ms left for motors.</p>
+    <p><strong>What this says.</strong> Nominally, predicting 50 ms ahead covers the decoder's estimated 45 ms processing delay, for 0.06° of extra error. At 150 ms the cost is 0.17°. Because the labels come from the other hand, this is a design budget, not a measured lead.</p>
     <p>It is that cheap because four frames in five are still, DB8 movements take about a second, and the decoder's own 6° to 8° error hides the rest. During movement alone the cost shows: 8.53° at 0 ms against 8.99° at 150 ms for the able-bodied group.</p>
 
     <h3>What a longer window buys</h3>
@@ -590,7 +594,7 @@
         <tr><td>200 ms</td><td class="num">about 100 ms</td><td class="num">9.19°</td><td class="num">0.55</td><td class="num">0.43</td></tr>
       </tbody>
     </table></div>
-    <p>Once the model has memory, quadrupling the window buys 0.23° and costs 75 ms. That is why the final decoder uses the 50 ms window: the short window fits the delay budget and the integrators do the smoothing.</p>
+    <p>Once the model has memory, quadrupling the window buys 0.23° and costs 75 ms. We chose the 50 ms window for the final decoder on this reasoning; other windows were not re-tested with it.</p>
   </section>
 
   <!-- ================= 7. ERRORS ================= -->
@@ -601,12 +605,12 @@
       <p class="standfirst">Error on the test session, split by what the hand was doing and by finger.</p>
     </header>
     <ul class="cols2">
-      <li><h4>Rest error is at the physical floor</h4><p>4.29° at rest, against a 4.3° spread in resting posture that occurs while the muscles are quiet. There is nothing left for EMG to explain there.</p></li>
+      <li><h4>Rest error is at the physical floor</h4><p>4.29° at rest for the able-bodied group, against their 4.3° spread in resting posture while the muscles are quiet. There is nothing left for EMG to explain there.</p></li>
       <li><h4>Holds were the big win, and are still hard</h4><p>Hold error fell from 14.2° (ridge) to 7.9°, a 44% drop, once the model had seconds of memory and a nonlinear readout. Low EMG during a hold no longer reads as "back to rest".</p></li>
       <li><h4>Movement is now the largest error</h4><p>8.5° while fingers are moving. This is also where label timing hurts: the glove hand and the EMG arm are out of step by ±100 ms or more.</p></li>
-      <li><h4>Thumb rotation is the worst finger</h4><p>8.6° MAE, while middle and ring/little reach R² 0.82 to 0.83. Anatomy predicts this: swinging the thumb across the palm relies on muscles inside the hand, which forearm sensors cannot see.</p></li>
+      <li><h4>The thumb is the hardest digit</h4><p>Thumb rotation has the largest error in degrees, 8.6°. A likely reason is anatomy: swinging the thumb across the palm relies on muscles inside the hand, which forearm sensors cannot see. By R², thumb flexion is weakest (0.66 against 0.72 for rotation), because it moves through the smallest range, about 50°. Middle and ring/little reach 0.82 to 0.83.</p></li>
       <li><h4>Amputees: holds stay hard</h4><p>8.04° overall and 11.3° during holds. Fewer working sensors and missing hand muscles are the likely causes. With two people this is an observation, not a pattern.</p></li>
-      <li><h4>How much is label timing?</h4><p>Less than we feared. A random ±100 ms shift of the labels alone produces about 0.5° of average error (1.1° at ±200 ms), because most frames are still. It concentrates in transitions.</p></li>
+      <li><h4>How much is label timing?</h4><p>Less than we feared. Shifting the labels at random, with a standard deviation of 100 ms, produces about 0.5° of average error on its own (1.1° at 200 ms; able-bodied, session 3), because most frames are still. It concentrates in transitions.</p></li>
     </ul>
     <div class="stack">
       <details>
@@ -615,7 +619,7 @@
     <ul class="cols2">
       <li><h4>Calibration: validation said yes, test said no</h4><p>Across-day validation preferred the per-session rescaling (7.8° against 8.7°). On the test session it cost 0.24°. Our validation trained on one session where the final model trains on two, which already covers day-to-day change. A validation set-up should mirror the final one.</p></li>
       <li><h4>Is the long memory just learning the protocol?</h4><p>We checked. Capping the integrators at 1.5 s instead of 4 s costs the able-bodied group 0.14° (6.06° to 6.20°). A full rest-move-hold cycle takes 9 to 12 s, longer than any integrator spans.</p></li>
-      <li><h4>Linear correction undershoots</h4><p>In Task 2 the ridge correction predicted about 0.8° of change per 100 ms where the real change was about 1.1°. It shrinks its corrections to avoid inventing movement at rest.</p></li>
+      <li><h4>Linear correction undershoots</h4><p>In Task 2 the ridge correction predicted about 0.8° of change per 100 ms where the real change was about 1.1° (measured on person 3). It shrinks its corrections to avoid inventing movement at rest.</p></li>
       <li><h4>An effect we chose not to claim</h4><p>For the amputees, predicting 50 to 150 ms ahead was slightly <em>better</em> than predicting the present (8.04° to 7.82°). It fits EMG leading the label hand for person 12, but with opposite-hand labels we cannot separate that from hand offset.</p></li>
     </ul>
         </div>
@@ -636,8 +640,8 @@
       <li><h4>Offline accuracy is not control</h4><p>The dataset's authors found no reliable link between offline scores and real-time prosthesis control across the same 12 people<sup><a href="#ref-db8">[1]</a></sup>. Users adapt to a decoder. Our numbers say what is decodable, not how the hand would feel.</p></li>
       <li><h4>Momentum beat EMG at short-term forecasting</h4><p>With a known angle, constant velocity won. EMG should matter at movement onset, when velocity is still zero but the muscles have fired. We did not test EMG on top of velocity, or score onsets separately.</p></li>
       <li><h4>Two amputees, one model per person</h4><p>We cannot generalise about amputees, and we never tested a model on a person it was not trained on. A new user would need their own recording session.</p></li>
-      <li><h4>EMG reflects force, not position</h4><p>The same posture can be held relaxed or tense. DB8 is unloaded and the forearm rests on a desk; grasping real objects or moving the arm would change the signals.</p></li>
-      <li><h4>The delay is a desktop-software figure</h4><p>16.5 ms of inference is Python on a general-purpose CPU. We did not deploy to a microcontroller, so the 45 ms total says nothing about sensing or motor delays, and the compute part would change on real hardware.</p></li>
+      <li><h4>EMG reflects force, not position</h4><p>The same posture can be held relaxed or tense. DB8 movements are unloaded and the forearm moves little; grasping real objects or moving the arm would change the signals.</p></li>
+      <li><h4>The delay is a desktop-software figure</h4><p>16.5 ms of inference is Python on a general-purpose CPU. We did not deploy to a microcontroller, so the 45 ms total says nothing about sensing or motor delays, and the compute part would change on real hardware. It is the processing delay of the newest sample; the effective lag of a decoder with seconds of memory was not measured.</p></li>
       <li><h4>Not run, though planned</h4><p>The recurrent network from our proposal (replaced by the integrator features), the motion-sensor ablation, and the per-person label shift.</p></li>
     </ul>
   </section>
@@ -648,8 +652,8 @@
       <span class="n">9 of 10</span>
       <h2>The answer</h2>
     </header>
-    <p style="font-size:1.14rem;color:var(--ink)">On NinaPro DB8, a decoder can be fast without giving up much accuracy. The window is where the delay is, and once the model has memory a 50 ms window costs 0.23° compared with 200 ms. Predicting 50 ms ahead then cancels the decoder's whole delay for 0.06°.</p>
-    <p>Getting accuracy needed two things a linear model lacks: memory of what the muscles did over the last few seconds, and the ability to treat rest, hold and movement differently. With both, error fell from 9.35° to 6.39°, level with published deep-learning results, and ahead of the one paper that reports R² for the two amputees.</p>
+    <p style="font-size:1.14rem;color:var(--ink)">On NinaPro DB8, a decoder can be fast without giving up much accuracy. The window is where the delay is, and once the model has memory a 50 ms window costs 0.23° compared with 200 ms. Predicting 50 ms ahead then nominally covers the decoder's estimated 45 ms processing delay for 0.06°: a design budget, not a measured lead, because the labels come from the other hand.</p>
+    <p>Getting accuracy needed two things a linear model lacks: memory of what the muscles did over the last few seconds, and the ability to treat rest, hold and movement differently. With both, error fell from 9.35° to 6.39°, level with published deep-learning results, and ahead of both papers that report R² for the two amputees.</p>
     <p>For forecasting the next 100 ms when the finger's position is already known, physics won: momentum beat our EMG models. On slow movements, EMG earns its place by telling the hand what posture the user wants, not by out-predicting inertia.</p>
     <p>The next experiment is clear. Repeat the window and horizon sweep on data where the label is on the same hand as the EMG and movements are fast, such as emg2pose, and score movement onsets on their own. That is where a head start from the muscles should show, if it is usable.</p>
   </section>

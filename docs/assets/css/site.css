@@ -69,19 +69,19 @@ sup { line-height: 0; }
 
 /* ---------- page frame with the nerve rail ---------- */
 .frame { width: min(1180px, 100% - 48px); margin: 0 auto; display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: 0 56px; }
-.rail { position: sticky; top: 0; align-self: start; height: 100vh; padding: 56px 0 40px; }
-.railwrap { position: relative; }
+.rail { position: sticky; top: 0; align-self: start; height: 100vh; padding: 22px 0 40px; }
+.railwrap { position: relative; padding-top: 72px; }
 .rail ol { list-style: none; margin: 0; padding: 0; position: relative; }
-.railwrap::before { content: ""; position: absolute; left: 5px; top: 14px; bottom: 14px; width: 2px; background: var(--line); border-radius: 2px; }
-.rail .pulse { position: absolute; left: 5px; top: 14px; width: 2px; height: 0; background: var(--glow-dim); border-radius: 2px; transition: height .35s ease; }
+/* the neuron beside the section list is drawn by app.js */
+#railNeuron { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+#railNeuron .lit { filter: drop-shadow(0 0 3px rgba(134,208,255,.75)) drop-shadow(0 0 9px rgba(134,208,255,.35)); }
+#railNeuron .halo { opacity: 0; transition: transform .45s cubic-bezier(.3,.7,.2,1), opacity .3s; filter: drop-shadow(0 0 6px rgba(134,208,255,.9)); }
 .rail li { position: relative; }
-.rail ol a { display: block; padding: 7px 0 7px 28px; color: var(--ink-3); text-decoration: none; font-size: .93rem; line-height: 1.3; }
-.rail ol a::before { content: ""; position: absolute; left: 0; top: 11px; width: 12px; height: 12px; border-radius: 50%; background: var(--abyss); border: 2px solid var(--line); transition: border-color .2s, background .2s, box-shadow .2s; }
+.rail ol a { display: block; padding: 7px 0 7px 48px; color: var(--ink-3); text-decoration: none; font-size: .93rem; line-height: 1.3; transition: color .2s; }
 .rail ol a:hover { color: var(--ink); }
-.rail ol a.passed::before { border-color: var(--glow-dim); background: var(--glow-dim); }
+.rail ol a.passed { color: var(--ink-2); }
 .rail ol a.here { color: #fff; }
-.rail ol a.here::before { border-color: var(--glow); background: var(--glow); box-shadow: 0 0 0 4px rgba(134,208,255,.14), 0 0 14px var(--glow); }
-.rail .repo { margin-top: 26px; padding-left: 28px; font-size: .9rem; }
+.rail .repo { margin-top: 62px; padding-left: 48px; font-size: .9rem; }
 .rail .repo a { color: var(--ink-2); }
 
 main { padding: 24px 0 80px; min-width: 0; }
@@ -259,7 +259,8 @@ footer .frame { display: block; }
   .frame { grid-template-columns: minmax(0, 1fr); }
   .rail { position: sticky; top: 0; z-index: 20; height: auto; padding: 0; margin: 0 -24px; background: rgba(6,18,34,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-soft); }
   .rail ol { display: flex; overflow-x: auto; padding: 0 16px; scrollbar-width: none; }
-  .railwrap::before, .rail .pulse, .rail ol a::before, .rail .repo { display: none; }
+  #railNeuron, .rail .repo { display: none; }
+  .railwrap { padding-top: 0; }
   .rail ol a { padding: 12px 10px; white-space: nowrap; border-bottom: 2px solid transparent; }
   .rail ol a.here { border-bottom-color: var(--glow); }
   html { scroll-padding-top: 60px; }
