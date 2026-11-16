@@ -1,4 +1,5 @@
-data/
+# Dataset and processed arrays stay out of git (see README for how to get them)
+/data/
 *.npz
 *.mat
 __pycache__/

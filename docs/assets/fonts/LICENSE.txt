@@ -1,0 +1,8 @@
+Fonts in this folder
+
+Bricolage Grotesque - Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)
+Atkinson Hyperlegible Next - Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors (https://github.com/googlefonts/atkinson-hyperlegible-next)
+
+Both are licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org
+Files were taken from the Fontsource packages @fontsource-variable/bricolage-grotesque and
+@fontsource/atkinson-hyperlegible-next.
