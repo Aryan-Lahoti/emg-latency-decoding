@@ -91,18 +91,20 @@ No notch filter is used because mains interference was already removed in the re
 
 ## Model runs
 
-One model per person in every run.
+One model per person in every run. Full commands, outputs and the analyses that only print are in
+[`models/README.md`](models/README.md). Set `DB8_PROCESSED` if your processed files are not in `data/processed/`.
 
 | Run | What it does | Script | Result file |
 |---|---|---|---|
-| 1 | Persistence and ridge, 3 windows × 4 horizons | `models/train_grid.py` | `results/grid_raw.csv`, `results/grid_raw.png` |
-| 2 | Window without history; history length; ridge with current angle; error by phase | in `models/` | `results/followups_all.csv`, `results/followups_summary.png` |
-| 3 | Bias-variance and feature correlations (subject 3) | `models/bv.py` | `results/bias_variance_ridge.png` |
-| 4 | Deadband and tree gates, validation ranking, corner checks | in `models/` | in `results/` |
-| 5 | No-EMG velocity baselines and perfect-gate ceiling | in `models/` | in `results/` |
+| 1 | Persistence and ridge, 3 windows × 4 horizons | `models/train_grid.py`, `models/plot_grid.py` | `results/grid_raw.csv`, `results/grid_raw.png` |
+| 2 | Window without history; history length; ridge with current angle; error by phase | `models/experiments.py`, `models/plot_followups.py` | `results/followups_all.csv`, `results/followups_summary.png` |
+| 3 | Bias-variance and ridge geometry (subject 3) | `models/bv.py`, `models/bv_plot.py` | `results/bias_variance_ridge.png` |
+| 4 | Deadband and tree gates, validation ranking, corner checks | `models/gates.py` | `results/gates/` |
+| 5 | No-EMG velocity baselines, perfect-gate ceiling, label-noise floors | `models/velocity_baselines.py` | `results/velocity_baselines.csv` |
 | 6 | Final decoder: integrator features, neural net + boosted trees, cross-session selection, test, ablations, horizon sweep, inference timing | `models/benchmark/` | `results/benchmark/` |
+| 7 | MuJoCo replay video and per-movement clips | `models/viz/` | `results/viz/`, `docs/assets/media/` |
 
-Run a script from the repository root, for example `python models/train_grid.py`.
+Run scripts from the repository root, for example `python models/train_grid.py data/processed results`.
 
 ## Website
 
