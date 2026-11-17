@@ -44,6 +44,9 @@ cd emg-latency-decoding
 pip install -r requirements.txt
 ```
 
+`mujoco` is needed only for run 7 (the simulated-hand video), together with a local copy of
+MuJoCo Menagerie (https://github.com/google-deepmind/mujoco_menagerie) for the Shadow Hand model.
+
 ## Data access
 
 The data is not in this repository.
@@ -145,4 +148,7 @@ We used Claude (Anthropic) throughout the project.
 - Cavanagh P. R., Komi P. V. (1979). Electromechanical delay in human skeletal muscle under concentric and eccentric contractions. Eur. J. Appl. Physiol. 42, 159-163.
 - Diedrichsen J., Hazeltine E., Nurss W. K., Ivry R. B. (2003). The role of the corpus callosum in the coupling of bimanual isometric force pulses. J. Neurophysiol. 90, 2409-2418.
 - George J. A., Tully T. N., Colgan P. C., Clark G. A. (2020). Bilaterally mirrored movements improve the accuracy and precision of training data for supervised learning of neural or myoelectric prosthetic control. IEEE EMBC. arXiv:2001.08807
+- Todorov E., Erez T., Tassa Y. (2012). MuJoCo: a physics engine for model-based control. IEEE/RSJ IROS, 5026-5033. (simulated-hand clips)
+- MuJoCo Menagerie, Google DeepMind. https://github.com/google-deepmind/mujoco_menagerie ; Shadow Hand model (`shadow_hand/`), used under the licence in that folder.
+- Pedregosa F. et al. (2011). Scikit-learn: machine learning in Python. Journal of Machine Learning Research 12, 2825-2830. (ridge, boosted trees, neural network)
 - Website fonts: Bricolage Grotesque and Atkinson Hyperlegible Next, SIL Open Font License 1.1.
