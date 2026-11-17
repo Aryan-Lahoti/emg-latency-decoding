@@ -241,20 +241,6 @@
   /* =====================================================================
      3. Model-section charts
      ===================================================================== */
-  chart('bvChart', function (host, w) {
-    var b = D.biasVar, rows = [{ n: 'No penalty', bias: b.bias2Tuned, v: b.varNoPenalty }, { n: 'Strongest penalty', bias: b.bias2Strong, v: b.varStrong }];
-    var h = 132, s = newSvg(host, w, h, 'Bias squared and variance of the ridge model with no penalty and with the strongest penalty');
-    var x0 = 0, x1 = w - 10, max = 400, X = function (v) { return x0 + (x1 - x0) * v / max; };
-    rows.forEach(function (r, i) {
-      var y = 10 + i * 50;
-      svgEl('text', { x: 0, y: y + 10 }, s, r.n);
-      svgEl('path', { d: barPath(x0, y + 18, X(r.bias) - 2, 12, 0), fill: C.blue }, s);
-      svgEl('path', { d: barPath(X(r.bias) + 1, y + 18, Math.max(X(r.v), 2), 12, 4), fill: C.orange }, s);
-      svgEl('text', { x: w - 4, y: y + 10, 'text-anchor': 'end', class: 'val' }, s, 'bias² ' + r.bias + ' + variance ' + r.v);
-    });
-    svgEl('rect', { x: 0, y: h - 14, width: 10, height: 10, rx: 3, fill: C.blue }, s); svgEl('text', { x: 16, y: h - 5, class: 'muted' }, s, 'bias² (deg²), includes label noise');
-    svgEl('rect', { x: Math.min(250, w - 110), y: h - 14, width: 10, height: 10, rx: 3, fill: C.orange }, s); svgEl('text', { x: Math.min(266, w - 94), y: h - 5, class: 'muted' }, s, 'variance');
-  });
   chart('corrChart', function (host, w) {
     hbars(host, w, D.corr.map(function (r, i) { return { name: r.label, v: r.v, color: i < 2 ? C.orange : C.blue, hi: i < 2, tip: i < 2 ? 'a copy created by our feature design' : 'between two different sensors' }; }),
       { max: 1.0, fmt: function (v) { return v.toFixed(2); }, labelW: 240, rowH: 30, label: 'Correlation between pairs of model inputs' });

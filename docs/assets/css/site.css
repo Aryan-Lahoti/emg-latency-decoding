@@ -172,6 +172,8 @@ figure.nb { background: var(--deep); border: 1px solid var(--line-soft); border-
 figure.nb .plot { background: #000; border-radius: 8px; overflow: hidden; }
 figure.nb img { width: 100%; height: auto; filter: invert(1) hue-rotate(180deg) saturate(1.15) brightness(1.05); mix-blend-mode: screen; }
 figure.nb .plot { background: var(--deep); }
+figure.nb a.plot { display: block; cursor: zoom-in; }
+figure.nb.wide-fig { margin: 22px 0 10px; }
 figcaption { color: var(--ink-2); font-size: .9rem; line-height: 1.5; margin-top: 12px; max-width: 80ch; }
 figcaption b { color: #fff; font-weight: 600; }
 

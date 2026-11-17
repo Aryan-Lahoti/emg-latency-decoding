@@ -319,16 +319,19 @@
         <span class="k">2</span>
         <h3>Ridge regression, and the assumption behind it</h3>
         <p>We chose ridge because we expected the 16 sensors to overlap: neighbours sit over the same muscles, and plain least squares turns near-duplicate inputs into huge opposite weights. Ridge's penalty keeps the weights small.</p>
-        <div class="two" style="margin:22px 0 6px">
-          <div>
-            <h4>The bias–variance check said keep it</h4>
-            <p class="small" style="color:var(--ink-2)">Person 3, model refitted 30 times on resampled repetitions. Across the penalty range, variance fell from 11 to 0.04 deg², while bias² stayed near 169 deg² until the penalty became strong (376 deg² at the extreme). Around the tuned penalty the variance reduction is almost free.</p>
-            <div class="chart" id="bvChart"></div>
-          </div>
+        <figure class="nb wide-fig">
+          <a class="plot" href="assets/img/bias_variance_ridge.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/img/bias_variance_ridge.png" width="2080" height="650" loading="lazy" alt="Three panels: ridge weight path for two near-identical inputs, bias squared and variance against penalty strength, and training versus validation error with weight size against penalty strength"></a>
+          <figcaption><b>The bias–variance check said keep ridge</b> (person 3, EMG-only ridge, 100 ms window, 1.5 s history). <b>1.</b> Two near-identical inputs, the RMS and MAV of electrode 7 (correlation 0.995). Without a penalty the model gives them large opposite weights (14 and −18); ridge pulls them in along the orange path to 3.3 and −7.4 at the tuned penalty, for almost no extra error. <b>2.</b> The model refitted 30 times on resampled training repetitions: variance falls from 11 to 0.04 deg² as the penalty grows, while bias² stays near 169 deg² until the penalty is strong (376 deg² at the far right). The grey line is the minimum of the total error, λ ≈ 0.005, next to the 0.01 that validation chose. <b>3.</b> Training and validation error stay close everywhere; the weights shrink from about 77 to under 5. From <code>models/bv.py</code>.</figcaption>
+        </figure>
+        <div class="two wide-left" style="margin:22px 0 6px">
           <div>
             <h4>Then we measured the overlap itself</h4>
             <p class="small" style="color:var(--ink-2)">Correlation between pairs of inputs, person 3. The sensors are nearly independent. The duplicates were our own features.</p>
             <div class="chart" id="corrChart"></div>
+          </div>
+          <div>
+            <h4>Reading the two together</h4>
+            <p class="small" style="color:var(--ink-2)">Around the tuned penalty, ridge buys a large drop in variance for almost no bias. But the near-duplicates it was taming are RMS against MAV of the same sensor (panel 1), not neighbouring sensors.</p>
           </div>
         </div>
         <p>So the assumption was wrong in a helpful way. Each sensor carries its own information, which is good for decoding. Ridge was still earning its keep, on the copies we had created: two summaries of the same sensor (RMS and MAV, 0.98) and overlapping snapshots in time (0.74).</p>
