@@ -1,0 +1,74 @@
+[
+ {
+  "id": 1,
+  "name": "thumb flexion",
+  "start_s": 5.07,
+  "duration_s": 21.06,
+  "full": "01_thumb_flexion_full.mp4",
+  "hand": "01_thumb_flexion_hand.mp4"
+ },
+ {
+  "id": 2,
+  "name": "thumb abduction",
+  "start_s": 31.29,
+  "duration_s": 18.8,
+  "full": "02_thumb_abduction_full.mp4",
+  "hand": "02_thumb_abduction_hand.mp4"
+ },
+ {
+  "id": 3,
+  "name": "index flexion",
+  "start_s": 56.29,
+  "duration_s": 26.25,
+  "full": "03_index_flexion_full.mp4",
+  "hand": "03_index_flexion_hand.mp4"
+ },
+ {
+  "id": 4,
+  "name": "middle flexion",
+  "start_s": 85.77,
+  "duration_s": 23.78,
+  "full": "04_middle_flexion_full.mp4",
+  "hand": "04_middle_flexion_hand.mp4"
+ },
+ {
+  "id": 5,
+  "name": "ring little flexion",
+  "start_s": 112.77,
+  "duration_s": 24.01,
+  "full": "05_ring_little_flexion_full.mp4",
+  "hand": "05_ring_little_flexion_hand.mp4"
+ },
+ {
+  "id": 6,
+  "name": "index pointer",
+  "start_s": 139.92,
+  "duration_s": 24.01,
+  "full": "06_index_pointer_full.mp4",
+  "hand": "06_index_pointer_hand.mp4"
+ },
+ {
+  "id": 7,
+  "name": "cylindrical grip",
+  "start_s": 168.48,
+  "duration_s": 29.58,
+  "full": "07_cylindrical_grip_full.mp4",
+  "hand": "07_cylindrical_grip_hand.mp4"
+ },
+ {
+  "id": 8,
+  "name": "lateral grip",
+  "start_s": 201.25,
+  "duration_s": 27.17,
+  "full": "08_lateral_grip_full.mp4",
+  "hand": "08_lateral_grip_hand.mp4"
+ },
+ {
+  "id": 9,
+  "name": "tripod grip",
+  "start_s": 233.38,
+  "duration_s": 26.62,
+  "full": "09_tripod_grip_full.mp4",
+  "hand": "09_tripod_grip_hand.mp4"
+ }
+]
